@@ -1,5 +1,6 @@
 import flet as ft
 import asyncio
+from google import genai
 
 def main(page: ft.Page):
     # アプリのタイトルを設定
@@ -27,21 +28,34 @@ def main(page: ft.Page):
         min_lines=4
     )
 
-
-    async def ask_gemini(e):
+    def ask_gemini(input_text):
         # ここにGemini APIを呼び出すコードを追加
         # 例: response = await call_gemini_api(prompt)
-        await asyncio.sleep(1)  # Simulate network delay
+        print('status 0')
+        with open('apikey.txt', 'r') as f: 
+            apiKEY = f.read()
+        client = genai.Client(api_key=apiKEY)
+        print('status 1')
 
-        response = "Mock response from Gemini API"
+        try:
+            print('status 2')
+        
+            response = client.models.generate_content(model="gemini-2.0-flash", contents = [input_text]) # get API result
+        
+            print('status 3')
+            res = response.text
+            
+        except Exception as e:
+            res = f"ERROR: {e}"
 
-        return response
+
+        return res
     
     # ボタンがクリックされた時の処理
     def interface_gemini(e):
         # 入力フィールドの値を読み取り専用フィールドに転送
         
-        response = asyncio.run(ask_gemini(input_field.value))
+        response = ask_gemini(input_field.value)
         output_field.value = response
         # UIを更新
         page.update()
@@ -70,7 +84,7 @@ def main(page: ft.Page):
         ft.Column(
             [
                 ft.Text("Clothing Suggestion App", size=30, weight=ft.FontWeight.BOLD),
-                ft.Text("version mock 0.0.1", size=16),
+                ft.Text("version  0.1.0", size=16),
                 ft.Divider(), # ----------------
                 
                 ft.Container(height=20),
