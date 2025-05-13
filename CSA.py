@@ -88,7 +88,7 @@ def main(page: ft.Page):
     
     # 画像選択ボタン
     def pick_files_result(e: ft.FilePickerResultEvent):
-        # ongoing
+        #  << - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - ongoing
         pass
     
     image_button = ft.OutlinedButton(
