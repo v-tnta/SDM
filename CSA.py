@@ -50,13 +50,21 @@ def main(page: ft.Page):
     )
 
     # Markdownを囲む青い枠＋スクロール対応
-    output_box = ft.Container(
-        content=ft.Column([output_markdown], scroll=ft.ScrollMode.ALWAYS),
-        padding=10,
-        border=ft.border.all(2, ft.Colors.INDIGO),
-        border_radius=8,
-        width=500,
-        height=300,  # 固定高さ（超えたらスクロール）
+    output_dialog = ft.AlertDialog(
+        title=ft.Text("提案されたコーディネート:"),
+        actions=[
+            ft.TextButton("閉じる", on_click=lambda e:page.close(output_dialog)),
+        ],
+        content=ft.Container( 
+            ft.Container(
+                content=ft.Column([output_markdown],scroll=ft.ScrollMode.ALWAYS),
+                padding=10,
+                border=ft.border.all(2, ft.Colors.INDIGO),
+                border_radius=8,
+                width=500,
+                height=300,  # 固定高さ（超えたらスクロール）
+            )
+        )
     )
 
     # ボタンをローディング表示に切り替え
@@ -143,6 +151,9 @@ def main(page: ft.Page):
             response = ask_gemini_coordinate(input_field.value)
             change_button(onchange=0, instruction_type=0)
             output_markdown.value = response
+            page.open(output_dialog)  # ダイアログを設定
+            # output_dialog.open = True  # ダイアログを開く
+
         elif instruction_type == 1:
             change_button(onchange=1, instruction_type=1)
             response = ask_gemini_description()
@@ -176,7 +187,7 @@ def main(page: ft.Page):
                 ft.Column(
                     [
                         ft.Text("Coordinate Suggestion App", size=30, weight=ft.FontWeight.BOLD),
-                        ft.Text("version 0.1.3 | powered by gemini-2.0-flash", size=16),
+                        ft.Text("version 0.1.4 | powered by gemini-2.0-flash", size=16),
                         ft.Divider(),
                         ft.Container(height=20),
                         ft.Text("入力:", size=14),
@@ -191,10 +202,7 @@ def main(page: ft.Page):
                             alignment=ft.MainAxisAlignment.CENTER,
                         ),
                         ft.Container(height=20),
-                        ft.Divider(),
-                        ft.Text("結果:", size=14),
-                        output_box,
-                        ft.Divider(),
+                        ft.Divider()
                     ],
                     alignment=ft.MainAxisAlignment.CENTER,
                     horizontal_alignment=ft.CrossAxisAlignment.CENTER,
