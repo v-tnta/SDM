@@ -15,8 +15,19 @@ def main(page: ft.Page):
         selected_files.value = e.files[0].path if e.files else ""
         selected_files.update()
     
+    coordinate_path = ""
+
+    def pick_file_result_main(e: ft.FilePickerResultEvent):
+        nonlocal coordinate_path # needed if you want to modify the outer variable
+        coordinate_path = e.files[0].path if e.files else ""
+        print(f"Selected coordinate file: {coordinate_path}")
+
     file_picker = ft.FilePicker(
         on_result=pick_file_result
+    )
+    
+    file_picker_main = ft.FilePicker(
+        on_result=pick_file_result_main
     )
 
     selected_files = ft.Text("picked files here") # 選択されたファイル名を表示するテキスト
@@ -79,9 +90,9 @@ def main(page: ft.Page):
                     [ft.ProgressRing(width=16, height=16)],
                     alignment=ft.MainAxisAlignment.CENTER,
                 )
-            else:          
+            else:
                 send_button.content = None
-                send_button.icon =ft.Icons.SEND
+                send_button.icon = ft.Icons.SEND
                 send_button.text = "送信"
                 send_button.disabled = False
 
@@ -96,7 +107,7 @@ def main(page: ft.Page):
                 )
             else:          
                 send_button2.content = None
-                send_button2.icon =ft.Icons.SEND
+                send_button2.icon = ft.Icons.SEND
                 send_button2.text = "Ask Gemini"
                 send_button2.disabled = False
 
@@ -113,15 +124,26 @@ def main(page: ft.Page):
                 userinfo = f.read()
 
             client = genai.Client(api_key=apiKEY)
+            image = Image.open(coordinate_path) if coordinate_path else None
 
-            response = client.models.generate_content(
-                model="gemini-2.0-flash",
-                contents=[f"「ユーザーが提示したアイテム」:【{input_text}】"],
-                config=types.GenerateContentConfig(
-                    system_instruction=f"{prompt}\n尚、「ユーザー情報」は【\n{userinfo}\n】",
-                ),
-            )
+            if not image:
+                response = client.models.generate_content(
+                    model="gemini-2.0-flash",
+                    contents=[f"「ユーザーが提示したアイテム」:【{input_text}】"],
+                    config=types.GenerateContentConfig(
+                        system_instruction=f"{prompt}\n尚、「ユーザー情報」は【\n{userinfo}\n】",
+                    ),
+                )
+            else:
+                response = client.models.generate_content(
+                    model="gemini-2.0-flash",
+                    contents=[image, f"「ユーザーが提示したアイテム」:【{input_text}】"],
+                    config=types.GenerateContentConfig(
+                        system_instruction=f"{prompt}\n尚、「ユーザー情報」は【\n{userinfo}\n】",
+                    ),
+                )
             return response.text
+        
         except Exception as e:
             return f"ERROR: {e}"
 
@@ -174,6 +196,9 @@ def main(page: ft.Page):
 
     # HOME page
     def show_route_page():
+        page.overlay.append(file_picker_main)
+        page.update()
+        # ファイルピッカーをオーバーレイに追加して表示
         return ft.View(
             "/home",
             [
@@ -187,7 +212,7 @@ def main(page: ft.Page):
                 ft.Column(
                     [
                         ft.Text("Coordinate Suggestion App", size=30, weight=ft.FontWeight.BOLD),
-                        ft.Text("version 0.1.4 | powered by gemini-2.0-flash", size=16),
+                        ft.Text("version 0.1.5 | powered by gemini-2.0-flash", size=16),
                         ft.Divider(),
                         ft.Container(height=20),
                         ft.Text("入力:", size=14),
@@ -197,7 +222,15 @@ def main(page: ft.Page):
                             [
                                 send_button,
                                 ft.OutlinedButton("クリア", on_click=clear_fields, icon=ft.Icons.CLEAR),
-                                ft.OutlinedButton("アイテム登録", on_click=lambda e: page.go("/additems"), icon=ft.Icons.ADD)
+                                ft.OutlinedButton("アイテム登録", on_click=lambda e: page.go("/additems"), icon=ft.Icons.ADD),
+                                ft.OutlinedButton(
+                                    "参考にするコーデ", 
+                                    icon=ft.Icons.UPLOAD_FILE,
+                                    on_click=lambda e :file_picker_main.pick_files(
+                                        allow_multiple=False,
+                                        allowed_extensions=["jpg", "jpeg", "png", "bmp"]
+                                    )
+                                ),
                             ],
                             alignment=ft.MainAxisAlignment.CENTER,
                         ),
