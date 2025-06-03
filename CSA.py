@@ -232,7 +232,7 @@ def main(page: ft.Page):
                                     icon=ft.Icons.UPLOAD_FILE,
                                     on_click=lambda e :file_picker_main.pick_files(
                                         allow_multiple=False,
-                                        allowed_extensions=["jpg", "jpeg", "png", "bmp"]
+                                        allowed_extensions=["jpg", "jpeg", "png", "bmp", "webp"]
                                     )
                                 ),
                             ],
@@ -285,7 +285,7 @@ def main(page: ft.Page):
                             icon=ft.Icons.UPLOAD_FILE,
                             on_click=lambda e :file_picker.pick_files(
                                 allow_multiple=False,   
-                                allowed_extensions=["jpg", "jpeg", "png", "bmp"])
+                                allowed_extensions=["jpg", "jpeg", "png", "bmp", "webp"])
                         ),
                         selected_files,
                         send_button2,
