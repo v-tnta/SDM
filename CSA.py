@@ -185,6 +185,10 @@ def main(page: ft.Page):
 
     # クリア処理
     def clear_fields(e):
+        nonlocal coordinate_path
+        coordinate_path = ""  # 選択された画像のパスをクリア
+        selected_files.value = ""
+        pic_text.value = "N/A"
         input_field.value = ""
         output_markdown.value = "N/A"
         page.update()
